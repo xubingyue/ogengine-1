@@ -43,5 +43,11 @@
     <None Include="Shaders\vertex.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Shaders\lamp.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\lamp.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

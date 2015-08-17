@@ -61,6 +61,7 @@ private:
 		}
 		// Retrieve the directory path of the filepath
 		this->directory = path.substr(0, path.find_last_of('/'));
+		
 
 		// Process ASSIMP's root node recursively
 		this->processNode(scene->mRootNode, scene);
@@ -91,7 +92,7 @@ private:
 		vector<Vertex> vertices;
 		vector<GLuint> indices;
 		vector<Texture> textures;
-
+		if (!mesh->HasNormals()) cout << "ASSIMP::MESH_HAS_NO_NORMALS" << endl;
 		// Walk through each of the mesh's vertices
 		for (GLuint i = 0; i < mesh->mNumVertices; i++)
 		{
@@ -103,10 +104,12 @@ private:
 			vector.z = mesh->mVertices[i].z;
 			vertex.Position = vector;
 			// Normals
-			vector.x = mesh->mNormals[i].x;
-			vector.y = mesh->mNormals[i].y;
-			vector.z = mesh->mNormals[i].z;
-			vertex.Normal = vector;
+			if (mesh->HasNormals()){
+				vector.x = mesh->mNormals[i].x;
+				vector.y = mesh->mNormals[i].y;
+				vector.z = mesh->mNormals[i].z;
+				vertex.Normal = vector;
+			}
 			// Texture Coordinates
 			if (mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
 			{
@@ -194,6 +197,7 @@ GLint TextureFromFile(const char* path, string directory)
 	//Generate texture ID and load texture data 
 	string filename = string(path);
 	filename = directory + '/' + filename;
+	
 	GLuint textureID;
 	glGenTextures(1, &textureID);
 	int width, height;

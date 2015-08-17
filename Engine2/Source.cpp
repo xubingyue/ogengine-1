@@ -48,6 +48,8 @@ enum models{
 };
 GLushort m_models = FIRST;
 bool wireframe = false;
+bool rotattion = true;
+float angle = 1;
 // The MAIN function, from here we start our application and run our Game loop
 int main()
 {
@@ -82,11 +84,17 @@ int main()
 
 	// Setup and compile our shaders
 	Shader ourShader("Shaders/vertex.vert", "Shaders/fragment.frag");
+	Shader lampShader("Shaders/lamp.vert", "Shaders/lamp.frag");
 
 	Model ourModel1("objects/nanosuit/nanosuit.obj");
-	Model ourModel2("objects/cyborg/cyborg.obj");
-	Model ourModel3("objects/planet/planet.obj");
-	Model ourModel4("objects/rock/rock.obj");
+	Model lampModel("objects/bulb/ESLamp.obj");
+	
+
+	glm::vec3 pointLightPositions[] = {
+		glm::vec3(2.3f, -1.6f, -3.0f),
+		glm::vec3(-1.7f, 0.9f, 1.0f)
+	};
+
 
 
 	// Game loop
@@ -113,37 +121,52 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(ourShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(glGetUniformLocation(ourShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 
+		glUniform3f(glGetUniformLocation(ourShader.Program, "viewPos"), camera.Position.x, camera.Position.y, camera.Position.z);
+		// Point light 1
+		glUniform3f(glGetUniformLocation(ourShader.Program, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
+		glUniform3f(glGetUniformLocation(ourShader.Program, "pointLights[0].ambient"), 0.05f, 0.05f, 0.05f);
+		glUniform3f(glGetUniformLocation(ourShader.Program, "pointLights[0].diffuse"), 1.0f, 1.0f, 1.0f);
+		glUniform3f(glGetUniformLocation(ourShader.Program, "pointLights[0].specular"), 1.0f, 1.0f, 1.0f);
+		glUniform1f(glGetUniformLocation(ourShader.Program, "pointLights[0].constant"), 1.0f);
+		glUniform1f(glGetUniformLocation(ourShader.Program, "pointLights[0].linear"), 0.009);
+		glUniform1f(glGetUniformLocation(ourShader.Program, "pointLights[0].quadratic"), 0.0032);
+		// Point light 2
+		glUniform3f(glGetUniformLocation(ourShader.Program, "pointLights[1].position"), pointLightPositions[1].x, pointLightPositions[1].y, pointLightPositions[1].z);
+		glUniform3f(glGetUniformLocation(ourShader.Program, "pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);
+		glUniform3f(glGetUniformLocation(ourShader.Program, "pointLights[1].diffuse"), 1.0f, 1.0f, 1.0f);
+		glUniform3f(glGetUniformLocation(ourShader.Program, "pointLights[1].specular"), 1.0f, 1.0f, 1.0f);
+		glUniform1f(glGetUniformLocation(ourShader.Program, "pointLights[1].constant"), 1.0f);
+		glUniform1f(glGetUniformLocation(ourShader.Program, "pointLights[1].linear"), 0.009);
+		glUniform1f(glGetUniformLocation(ourShader.Program, "pointLights[1].quadratic"), 0.0032);
+
 		// Draw the loaded model
 		glm::mat4 model;
 		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it downž
-		float angle = glfwGetTime() * 25.0f;
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
+		if (rotattion){
+			angle = glfwGetTime() * 25.0f;
+			
+		}
 		model = glm::rotate(model, angle, glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(glGetUniformLocation(ourShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		
 		if (wireframe)glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		switch (m_models){
-		case FIRST:
-			
-			ourModel1.Draw(ourShader);
-			break;
-		case SECOND:
-			model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
-			glUniformMatrix4fv(glGetUniformLocation(ourShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-			ourModel2.Draw(ourShader);
-			break;
-		case THIRD:
-			model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
-			glUniformMatrix4fv(glGetUniformLocation(ourShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-			ourModel3.Draw(ourShader);
-			break;
-		case FOURTH:
-			model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
-			glUniformMatrix4fv(glGetUniformLocation(ourShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-			ourModel4.Draw(ourShader);
-			break;
+		
+		ourModel1.Draw(ourShader);
+		
+		lampShader.Use();
+		glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+
+		for (int i = 0; i < 2; i++){
+			model = glm::mat4();
+			model = glm::translate(model, glm::vec3(pointLightPositions[i])); // Translate it down a bit so it's at the center of the scene
+			model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+			glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+			lampModel.Draw(lampShader);
 		}
-		
-		
+	
+
 		glfwSwapBuffers(window);
 	}
 	// Properly de-allocate all resources once they've outlived their purpose
@@ -189,6 +212,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 	if (key == GLFW_KEY_Q && action == GLFW_PRESS){
 		wireframe = !wireframe;
+	}
+	if (key == GLFW_KEY_E && action == GLFW_PRESS){
+		rotattion = !rotattion;
 	}
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);

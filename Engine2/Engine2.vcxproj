@@ -83,6 +83,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\fragment.frag" />
+    <None Include="Shaders\lamp.frag" />
+    <None Include="Shaders\lamp.vert" />
     <None Include="Shaders\vertex.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
