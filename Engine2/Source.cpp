@@ -40,7 +40,14 @@ bool firstMouse = true;
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
-
+enum models{
+	FIRST,
+	SECOND,
+	THIRD,
+	FOURTH
+};
+GLushort m_models = FIRST;
+bool wireframe = false;
 // The MAIN function, from here we start our application and run our Game loop
 int main()
 {
@@ -76,7 +83,10 @@ int main()
 	// Setup and compile our shaders
 	Shader ourShader("Shaders/vertex.vert", "Shaders/fragment.frag");
 
-	Model ourModel("objects/nanosuit/nanosuit.obj");
+	Model ourModel1("objects/nanosuit/nanosuit.obj");
+	Model ourModel2("objects/cyborg/cyborg.obj");
+	Model ourModel3("objects/planet/planet.obj");
+	Model ourModel4("objects/rock/rock.obj");
 
 
 	// Game loop
@@ -110,7 +120,29 @@ int main()
 		float angle = glfwGetTime() * 25.0f;
 		model = glm::rotate(model, angle, glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(glGetUniformLocation(ourShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		ourModel.Draw(ourShader);
+		if (wireframe)glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		switch (m_models){
+		case FIRST:
+			
+			ourModel1.Draw(ourShader);
+			break;
+		case SECOND:
+			model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+			glUniformMatrix4fv(glGetUniformLocation(ourShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+			ourModel2.Draw(ourShader);
+			break;
+		case THIRD:
+			model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+			glUniformMatrix4fv(glGetUniformLocation(ourShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+			ourModel3.Draw(ourShader);
+			break;
+		case FOURTH:
+			model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+			glUniformMatrix4fv(glGetUniformLocation(ourShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+			ourModel4.Draw(ourShader);
+			break;
+		}
+		
 		
 		glfwSwapBuffers(window);
 	}
@@ -136,12 +168,28 @@ void Do_Movement()
 		camera.ProcessKeyboard(UP, deltaTime);
 	if (keys[GLFW_KEY_C])
 		camera.ProcessKeyboard(DOWN, deltaTime);
+
 }
 
 // Is called whenever a key is pressed/released via GLFW
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	//cout << key << endl;
+	if (key == GLFW_KEY_1){
+		m_models = FIRST;
+	}
+	if (key == GLFW_KEY_2){
+		m_models = SECOND;
+	}
+	if (key == GLFW_KEY_3){
+		m_models = THIRD;
+	}
+	if (key == GLFW_KEY_4){
+		m_models = FOURTH;
+	}
+	if (key == GLFW_KEY_Q && action == GLFW_PRESS){
+		wireframe = !wireframe;
+	}
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	if (key >= 0 && key < 1024)
